@@ -64,6 +64,12 @@
       >
         Register
       </button>
+      <p
+        @click="goToLogin"
+        class="mt-4 text-center text-gray-600 cursor-pointer"
+      >
+        Already have an account? Click <span class="text-blue-500">Login!</span>
+      </p>
     </form>
   </div>
 </template>
@@ -85,6 +91,9 @@ export default {
     };
   },
   methods: {
+    goToLogin() {
+      this.$router.push("/login");
+    },
     handleSubmit() {
       // Clear previous errors
       this.errors = { name: null, email: null, password: null };
