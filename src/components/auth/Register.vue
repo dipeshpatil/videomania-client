@@ -113,6 +113,9 @@ export default {
     goToLogin() {
       this.$router.push("/login");
     },
+    redirectHome() {
+      this.$router.push("/");
+    },
     handleSubmit() {
       // Clear previous errors
       this.errors = { name: null, email: null, password: null };
@@ -124,9 +127,10 @@ export default {
 
       // Check if there are any errors
       if (!this.errors.name && !this.errors.email && !this.errors.password) {
-        alert("Form submitted successfully!");
         const { name, email, password } = this.form;
         console.log({ name, email, password });
+        localStorage.setItem("token", 123);
+        this.redirectHome();
         // Handle successful submission here (e.g., API call)
       }
     },

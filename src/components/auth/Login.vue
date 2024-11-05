@@ -94,6 +94,9 @@ export default {
     goToRegister() {
       this.$router.push("/register");
     },
+    redirectHome() {
+      this.$router.push("/");
+    },
     handleSubmit() {
       // Clear previous errors
       this.errors = { email: null, password: null };
@@ -104,9 +107,9 @@ export default {
 
       // Check if there are any errors
       if (!this.errors.name && !this.errors.email && !this.errors.password) {
-        alert("Form submitted successfully!");
-        const { email, password } = this.form;
-        console.log({ email, password });
+        // const { email, password } = this.form;
+        localStorage.setItem("token", 123);
+        this.redirectHome();
         // Handle successful submission here (e.g., API call)
       }
     },
