@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173" # Map Vite’s dev server port
+    volumes:
+      - .:/app # Mount local files to the container for live reloading
+      - /app/node_modules # Prevents overwriting node_modules with an empty folder
+    environment:
+      - NODE_ENV=development
