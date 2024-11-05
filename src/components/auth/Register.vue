@@ -76,6 +76,25 @@
 
 <script>
 export default {
+  computed: {
+    isAuthenticated() {
+      return !!localStorage.getItem("token");
+    },
+  },
+  watch: {
+    isAuthenticated(value) {
+      // If not authenticated, redirect to home
+      if (value) {
+        this.$router.push("/");
+      }
+    },
+  },
+  mounted() {
+    // Redirect if not authenticated
+    if (this.isAuthenticated) {
+      this.$router.push("/");
+    }
+  },
   data() {
     return {
       form: {

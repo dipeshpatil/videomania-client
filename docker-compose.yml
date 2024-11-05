@@ -9,6 +9,9 @@ services:
       - "5173:5173" # Map Vite’s dev server port
     volumes:
       - .:/app # Mount local files to the container for live reloading
-      - /app/node_modules # Prevents overwriting node_modules with an empty folder
+      - node_modules:/app/node_modules
     environment:
       - NODE_ENV=development
+
+volumes:
+  node_modules: {}
