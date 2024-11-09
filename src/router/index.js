@@ -6,6 +6,7 @@ import Register from "../components/auth/Register.vue";
 import Home from "../components/Home.vue";
 import Profile from "../components/Profile.vue";
 import Videos from "../components/Videos.vue";
+import Links from "../components/Links.vue";
 
 const routes = [
   { path: "/", name: "Home", component: Home, meta: { requiresAuth: true } },
@@ -19,6 +20,12 @@ const routes = [
     path: "/videos",
     name: "Videos",
     component: Videos,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/links",
+    name: "Links",
+    component: Links,
     meta: { requiresAuth: true },
   },
   { path: "/login", name: "Login", component: Login },

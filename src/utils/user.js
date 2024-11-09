@@ -22,3 +22,24 @@ export async function getUserVideos(authToken) {
     };
   }
 }
+
+export async function getUserLinks(authToken) {
+  try {
+    const response = await axios.get(
+      "/user/links",
+      {},
+      { "x-auth-token": authToken || store.getters.getToken }
+    );
+
+    if (response.links) {
+      return { links: response.links, errors: null };
+    } else {
+      return { links: [], errors: response.errors };
+    }
+  } catch (error) {
+    return {
+      links: [],
+      errors: "Error fetching user videos",
+    };
+  }
+}
