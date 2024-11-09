@@ -47,17 +47,25 @@
       >
         Login
       </button>
+      <p v-if="errors.apiError" class="text-red-500 mt-4 text-center">
+        {{ errors.apiError }}
+      </p>
       <p
         @click="goToRegister"
         class="mt-4 text-center text-gray-600 cursor-pointer"
       >
-        Need an account? Click <span class="text-blue-500">Register!</span>
+        Need an account? Click <span class="text-green-500">Register!</span>
       </p>
     </form>
   </div>
 </template>
 
 <script>
+import {
+  loginUserAndAuthenticateToken,
+  getUserDetails,
+} from "../../utils/auth";
+
 export default {
   computed: {
     isAuthenticated() {
@@ -97,20 +105,39 @@ export default {
     redirectHome() {
       this.$router.push("/");
     },
-    handleSubmit() {
-      // Clear previous errors
-      this.errors = { email: null, password: null };
+    async handleSubmit() {
+      this.errors = { email: null, password: null, apiError: null };
 
-      // Validate form fields
       if (!this.form.email) this.errors.email = "Email is required.";
       if (!this.form.password) this.errors.password = "Password is required.";
 
-      // Check if there are any errors
       if (!this.errors.name && !this.errors.email && !this.errors.password) {
-        // const { email, password } = this.form;
-        localStorage.setItem("token", 123);
-        this.redirectHome();
-        // Handle successful submission here (e.g., API call)
+        const { email, password } = this.form;
+        const result = await loginUserAndAuthenticateToken(email, password);
+        if (result) {
+          const { token, errors } = result;
+          if (token) {
+            this.$store.dispatch("saveToken", token);
+
+            const userDetailsResult = await getUserDetails(token);
+            const { user, errors: userDetailsErrors } = userDetailsResult;
+
+            if (user) {
+              console.log(user);
+
+              this.$store.dispatch("saveUser", user);
+              this.redirectHome();
+            } else {
+              console.log(userDetailsErrors);
+            }
+          } else {
+            this.errors.apiError = errors?.msg;
+            console.log(errors?.msg);
+          }
+        } else {
+          this.errors.apiError =
+            "Failed to log in: function returned undefined";
+        }
       }
     },
   },

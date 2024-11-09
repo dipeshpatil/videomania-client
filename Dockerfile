@@ -7,11 +7,13 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install all dependencies, including devDependencies
-RUN npm install
-
 # Copy the entire project
 COPY . .
+
+RUN rm -rf node_modules/
+
+# Install all dependencies, including devDependencies
+RUN npm install
 
 # Expose the Vite development server port
 EXPOSE 5173

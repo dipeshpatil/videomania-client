@@ -1,16 +1,10 @@
-<template>
-  <div>Home</div>
-</template>
+<template>Home</template>
 
 <script>
 export default {
-  data() {
-    return {};
-  },
-  methods: {},
+  data() {},
+  computed: {},
 };
 </script>
 
-<style scoped>
-/* You can add custom styles here */
-</style>
+<style scoped></style>
