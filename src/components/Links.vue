@@ -1,6 +1,6 @@
 <template>
   <h2 class="text-xl font-semibold p-4">Video Links</h2>
-  <div class="overflow-x-auto">
+  <div v-if="!loading" class="overflow-x-auto">
     <table class="min-w-full bg-white rounded-lg">
       <thead>
         <tr class="text-left bg-gray-50">
@@ -54,15 +54,21 @@
       </tbody>
     </table>
   </div>
+  <Loader :loading="loading" :fullscreen="true" />
 </template>
 
 <script>
 import { getUserLinks } from "../utils/user";
+import Loader from "./Loader.vue";
 
 export default {
+  components: {
+    Loader,
+  },
   data() {
     return {
       links: [],
+      loading: true,
     };
   },
   computed: {
@@ -85,9 +91,8 @@ export default {
       try {
         const linksResult = await getUserLinks(); // Replace with your API endpoint
         const { links } = linksResult;
-        console.log(links);
-
         this.links = links; // Store the fetched data in the videos array
+        this.loading = false;
       } catch (error) {
         console.error("Error fetching videos:", error);
       }
