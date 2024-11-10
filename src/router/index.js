@@ -6,9 +6,18 @@ import Register from "../components/auth/Register.vue";
 import Home from "../components/Home.vue";
 import Profile from "../components/Profile.vue";
 import Videos from "../components/Videos.vue";
+import Links from "../components/Links.vue";
+import Upgrade from "../components/Upgrade.vue";
+import Transactions from "../components/Transactions.vue";
 
 const routes = [
-  { path: "/", name: "Home", component: Home, meta: { requiresAuth: true } },
+  { path: "/upgrade", name: "Upgrade", component: Upgrade },
+  {
+    path: "/",
+    name: "Home",
+    component: Home,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/profile",
     name: "Profile",
@@ -19,6 +28,18 @@ const routes = [
     path: "/videos",
     name: "Videos",
     component: Videos,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/links",
+    name: "Links",
+    component: Links,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/transactions",
+    name: "Transactions",
+    component: Transactions,
     meta: { requiresAuth: true },
   },
   { path: "/login", name: "Login", component: Login },

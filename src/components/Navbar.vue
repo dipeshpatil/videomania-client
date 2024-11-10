@@ -2,7 +2,7 @@
   <nav class="flex justify-between items-center p-4 bg-gray-200">
     <!-- Logo Section - Left side -->
     <div class="flex items-center space-x-2">
-      <span class="font-bold text-xl text-blue-600">MyLogo</span>
+      <span class="font-bold text-xl text-pink-600">VideoMania</span>
       <!-- This is your placeholder logo -->
     </div>
 
@@ -20,10 +20,28 @@
         class="text-blue-500 hover:underline"
         >Videos</router-link
       >
+      <router-link
+        v-if="isAuthenticated"
+        to="/links"
+        class="text-blue-500 hover:underline"
+        >Links</router-link
+      >
     </div>
 
     <!-- Right side - Profile, Logout, Login, Register -->
     <div class="flex space-x-4 ml-auto">
+      <router-link
+        v-if="isAuthenticated"
+        to="/transactions"
+        class="text-blue-500 hover:underline"
+        >Transactions</router-link
+      >
+      <router-link
+        v-if="isAuthenticated"
+        to="/upgrade"
+        class="text-blue-500 hover:underline"
+        >Upgrade</router-link
+      >
       <router-link
         v-if="isAuthenticated"
         to="/profile"
