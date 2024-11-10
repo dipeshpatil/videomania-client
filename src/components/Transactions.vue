@@ -33,7 +33,7 @@
                 {{ transaction.description }}
               </h3>
               <p class="text-sm text-gray-600">
-                {{ formatTimestamp(transaction.createdAt) }}
+                {{ formatDate(transaction.createdAt) }}
               </p>
             </div>
           </div>
@@ -96,6 +96,41 @@ export default {
     formatTimestamp(timestamp) {
       const date = new Date(timestamp);
       return date.toLocaleString();
+    },
+
+    formatDate(isoDateString) {
+      const date = new Date(isoDateString);
+
+      // Define options for formatting
+      const day = date.getDate();
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const suffixes = ["th", "st", "nd", "rd"];
+
+      // Determine the suffix based on day
+      const daySuffix =
+        day % 10 < 4 && Math.floor(day / 10) !== 1
+          ? suffixes[day % 10]
+          : suffixes[0];
+
+      const formattedDate = `${day}${daySuffix} ${
+        monthNames[date.getMonth()]
+      } ${date.getFullYear()}`;
+      const formattedTime = date.toLocaleTimeString("en-GB"); // Format time as hh:mm:ss
+
+      return `${formattedDate}, ${formattedTime}`;
     },
 
     // Get CSS class based on action type (creditDeduction, etc.)
