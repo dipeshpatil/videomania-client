@@ -8,6 +8,7 @@ import Profile from "../components/Profile.vue";
 import Videos from "../components/Videos.vue";
 import Links from "../components/Links.vue";
 import Upgrade from "../components/Upgrade.vue";
+import Transactions from "../components/Transactions.vue";
 
 const routes = [
   { path: "/upgrade", name: "Upgrade", component: Upgrade },
@@ -33,6 +34,12 @@ const routes = [
     path: "/links",
     name: "Links",
     component: Links,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/transactions",
+    name: "Transactions",
+    component: Transactions,
     meta: { requiresAuth: true },
   },
   { path: "/login", name: "Login", component: Login },

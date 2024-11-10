@@ -32,6 +32,12 @@
     <div class="flex space-x-4 ml-auto">
       <router-link
         v-if="isAuthenticated"
+        to="/transactions"
+        class="text-blue-500 hover:underline"
+        >Transactions</router-link
+      >
+      <router-link
+        v-if="isAuthenticated"
         to="/upgrade"
         class="text-blue-500 hover:underline"
         >Upgrade</router-link

@@ -1,4 +1,7 @@
 <template>
+  <h2 class="text-xl font-semibold p-4">Upload Video</h2>
+  <VideoUpload @video-uploaded="handleVideoUploaded" />
+
   <h2 class="text-xl font-semibold p-4">Videos</h2>
   <div class="overflow-x-auto">
     <table class="min-w-full bg-white rounded-lg">
@@ -65,9 +68,14 @@
 </template>
 
 <script>
+import VideoUpload from "./video/VideoUpload.vue";
+
 import { getUserVideos } from "../utils/user";
 
 export default {
+  components: {
+    VideoUpload,
+  },
   data() {
     return {
       videos: [],
@@ -120,6 +128,11 @@ export default {
         month: "long",
         day: "numeric",
       });
+    },
+    handleVideoUploaded(result) {
+      // This method will be called when the 'file-uploaded' event is emitted
+      console.log("Notification:", result);
+      this.fetchVideos();
     },
   },
 };
