@@ -43,3 +43,29 @@ export async function getUserLinks(authToken) {
     };
   }
 }
+
+export async function getVideoURL(videoId, authToken) {
+  try {
+    const response = await axios.get(
+      `/video/${videoId}`,
+      {},
+      { "x-auth-token": authToken || store.getters.getToken }
+    );
+    if (response.videoURL) {
+      return {
+        videoURL: response.videoURL,
+        errors: null,
+      };
+    } else {
+      return {
+        videoURL: null,
+        errors: "Error fetching video URL",
+      };
+    }
+  } catch (error) {
+    return {
+      videoURL: null,
+      errors: "Error fetching video URL",
+    };
+  }
+}

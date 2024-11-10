@@ -95,6 +95,7 @@ export default {
       errors: {
         email: null,
         password: null,
+        apiError: null,
       },
     };
   },
@@ -111,7 +112,7 @@ export default {
       if (!this.form.email) this.errors.email = "Email is required.";
       if (!this.form.password) this.errors.password = "Password is required.";
 
-      if (!this.errors.name && !this.errors.email && !this.errors.password) {
+      if (!this.errors.email && !this.errors.password) {
         const { email, password } = this.form;
         const result = await loginUserAndAuthenticateToken(email, password);
         if (result) {

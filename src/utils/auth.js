@@ -19,6 +19,28 @@ export async function loginUserAndAuthenticateToken(email, password) {
   }
 }
 
+export async function registerUserAndGenerateToken(name, email, password) {
+  try {
+    const response = await axios.post(
+      "/auth/register",
+      { name, email, password },
+      {}
+    );
+    if (response.token) {
+      return { token: response.token, errors: null };
+    } else {
+      return { token: null, errors: response.errors };
+    }
+  } catch (error) {
+    console.log(error);
+
+    return {
+      token: null,
+      errors: { msg: "Register Error!" },
+    };
+  }
+}
+
 export async function getUserDetails(authToken) {
   try {
     const response = await axios.get(

@@ -1,10 +1,16 @@
-<template>Home</template>
+<template>
+  <div>
+    <VideoGrid />
+  </div>
+</template>
 
 <script>
+import VideoGrid from "./video/VideoGrid.vue";
+
 export default {
-  data() {},
-  computed: {},
+  components: {
+    VideoGrid,
+  },
+  mounted() {},
 };
 </script>
-
-<style scoped></style>

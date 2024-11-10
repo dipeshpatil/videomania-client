@@ -7,9 +7,16 @@ import Home from "../components/Home.vue";
 import Profile from "../components/Profile.vue";
 import Videos from "../components/Videos.vue";
 import Links from "../components/Links.vue";
+import Upgrade from "../components/Upgrade.vue";
 
 const routes = [
-  { path: "/", name: "Home", component: Home, meta: { requiresAuth: true } },
+  { path: "/upgrade", name: "Upgrade", component: Upgrade },
+  {
+    path: "/",
+    name: "Home",
+    component: Home,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/profile",
     name: "Profile",

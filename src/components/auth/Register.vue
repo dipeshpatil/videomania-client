@@ -64,6 +64,9 @@
       >
         Register
       </button>
+      <p v-if="errors.apiError" class="text-red-500 mt-4 text-center">
+        {{ errors.apiError }}
+      </p>
       <p
         @click="goToLogin"
         class="mt-4 text-center text-gray-600 cursor-pointer"
@@ -75,6 +78,9 @@
 </template>
 
 <script>
+import { registerUserAndGenerateToken } from "../../utils/auth";
+import { getUserDetails } from "../../utils/auth";
+
 export default {
   computed: {
     isAuthenticated() {
@@ -106,6 +112,7 @@ export default {
         name: null,
         email: null,
         password: null,
+        apiError: null,
       },
     };
   },
@@ -116,9 +123,9 @@ export default {
     redirectHome() {
       this.$router.push("/");
     },
-    handleSubmit() {
+    async handleSubmit() {
       // Clear previous errors
-      this.errors = { name: null, email: null, password: null };
+      this.errors = { name: null, email: null, password: null, apiError: null };
 
       // Validate form fields
       if (!this.form.name) this.errors.name = "Name is required.";
@@ -126,12 +133,37 @@ export default {
       if (!this.form.password) this.errors.password = "Password is required.";
 
       // Check if there are any errors
-      if (!this.errors.name && !this.errors.email && !this.errors.password) {
+      if (!this.errors.email && !this.errors.password) {
         const { name, email, password } = this.form;
-        console.log({ name, email, password });
-        localStorage.setItem("token", 123);
-        this.redirectHome();
-        // Handle successful submission here (e.g., API call)
+        const result = await registerUserAndGenerateToken(
+          name,
+          email,
+          password
+        );
+        if (result) {
+          const { token, errors } = result;
+          if (token) {
+            this.$store.dispatch("saveToken", token);
+
+            const userDetailsResult = await getUserDetails(token);
+            const { user, errors: userDetailsErrors } = userDetailsResult;
+
+            if (user) {
+              console.log(user);
+
+              this.$store.dispatch("saveUser", user);
+              this.redirectHome();
+            } else {
+              console.log(userDetailsErrors);
+            }
+          } else {
+            this.errors.apiError = errors?.msg;
+            console.log(errors?.msg);
+          }
+        } else {
+          this.errors.apiError =
+            "Failed to register: function returned undefined";
+        }
       }
     },
   },
