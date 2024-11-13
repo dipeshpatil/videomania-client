@@ -14,7 +14,7 @@
             Expiry Time
           </th>
           <th class="px-6 py-3 text-sm font-semibold text-gray-700 uppercase">
-            User
+            Author
           </th>
         </tr>
       </thead>
@@ -27,7 +27,7 @@
           <td class="px-6 py-4 text-gray-800">{{ videoLink.videoId.title }}</td>
           <td class="px-6 py-4 text-gray-800">
             <a
-              :href="videoLink.link"
+              :href="`/view/${videoLink.link}`"
               target="_blank"
               class="text-blue-600 hover:text-blue-800 underline"
             >
@@ -49,7 +49,7 @@
               }}
             </span>
           </td>
-          <td class="px-6 py-4 text-gray-800">{{ videoLink.user }}</td>
+          <td class="px-6 py-4 text-gray-800">{{ videoLink.user.name }}</td>
         </tr>
       </tbody>
     </table>
@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import { getRemainingTimeFromMinutes } from "../utils/common";
 import { getUserLinks } from "../utils/user";
 import Loader from "./Loader.vue";
 
@@ -76,7 +77,7 @@ export default {
       return this.links.map((link) => {
         return {
           ...link,
-          linkStatus: `< ${this.formatExpiryTime(link.expiryTime)}m`,
+          linkStatus: `< ${this.formatExpiryTime(link.expiryTime)}`,
           isExpired: this.formatExpiryTime(link.expiryTime) === "Expired",
         };
       });
@@ -86,7 +87,6 @@ export default {
     this.fetchLinks(); // Fetch the video data when the component is mounted
   },
   methods: {
-    // Fetch the video data from API or local storage
     async fetchLinks() {
       try {
         const linksResult = await getUserLinks(); // Replace with your API endpoint
@@ -96,14 +96,6 @@ export default {
       } catch (error) {
         console.error("Error fetching videos:", error);
       }
-    },
-    formatDate(timestamp) {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
     },
     formatExpiryTime(expiryTime) {
       const et = this.checkExpiry(expiryTime);
@@ -115,16 +107,15 @@ export default {
       const timeDifference = expiryDate - currentDate;
 
       if (timeDifference < 0) {
-        // Link has expired
         return {
           status: "Expired",
           expiryDate: expiryDate.toLocaleString(),
         };
       } else {
-        // Link is still valid, calculate minutes until expiration
-        const minutesUntilExpiry = Math.ceil(timeDifference / 60000); // Convert ms to minutes
         return {
-          status: minutesUntilExpiry,
+          status: getRemainingTimeFromMinutes(
+            Math.ceil(timeDifference / 60000)
+          ),
           expiryDate: expiryDate.toLocaleString(),
         };
       }

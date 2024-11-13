@@ -9,6 +9,7 @@ import Videos from "../components/Videos.vue";
 import Links from "../components/Links.vue";
 import Upgrade from "../components/Upgrade.vue";
 import Transactions from "../components/Transactions.vue";
+import ViewVideo from "../components/video/ViewVideo.vue";
 
 const routes = [
   { path: "/upgrade", name: "Upgrade", component: Upgrade },
@@ -41,6 +42,11 @@ const routes = [
     name: "Transactions",
     component: Transactions,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/view/:linkId",
+    name: "ViewVideo",
+    component: ViewVideo,
   },
   { path: "/login", name: "Login", component: Login },
   { path: "/register", name: "Register", component: Register },

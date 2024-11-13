@@ -17,13 +17,16 @@
             {{ video.title }}
           </h3>
           <p class="text-sm text-gray-600 mt-1">
-            Size: {{ formatFileSize(video.size) }}
+            <span class="font-bold">Size:</span>
+            {{ formatFileSize(video.size) }}
           </p>
           <p class="text-sm text-gray-600">
-            Duration: {{ video.duration }} sec
+            <span class="font-bold">Duration:</span>
+            {{ video.duration }} sec
           </p>
           <p class="text-sm text-gray-600">
-            Uploaded: {{ formatDate(video.createdAt) }}
+            <span class="font-bold">Uploaded:</span>
+            {{ formatDate(video.createdAt) }}
           </p>
           <div
             class="flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-lg"
@@ -37,16 +40,22 @@
             </a>
             <div class="flex space-x-2">
               <button
-                @click="renameVideo(video)"
+                @click="handleRenameVideoModal(video)"
                 class="text-white bg-green-500 hover:bg-green-600 px-2 py-1 rounded-md"
               >
-                Rename Title
+                Rename
               </button>
               <button
-                @click="shareVideo(video)"
+                @click="shareVideo(video._id)"
                 class="text-white bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded-md"
               >
                 Share
+              </button>
+              <button
+                @click="trimVideo(video._id)"
+                class="text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md"
+              >
+                Trim
               </button>
               <button
                 @click="deleteVideo(video._id)"
@@ -60,16 +69,190 @@
       </div>
     </div>
   </div>
+
+  <div>
+    <!-- Modal -->
+    <div
+      v-if="isShareModalOpen"
+      class="fixed inset-0 flex items-center justify-center z-50"
+    >
+      <!-- Backdrop -->
+      <div
+        class="fixed inset-0 bg-black opacity-50"
+        @click="
+          this.isShareModalOpen = false;
+          this.generatedLink = null;
+          this.generateLinkError = null;
+        "
+      ></div>
+
+      <!-- Modal Content -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full mx-4 md:mx-auto relative z-10"
+      >
+        <h2 class="text-xl font-semibold mb-4">Generate Share Link</h2>
+
+        <!-- Expiry Time Selection and Generate Button -->
+        <div class="flex items-center space-x-2 mb-4">
+          <!-- Expiry Time Dropdown -->
+          <select
+            id="expiry"
+            v-model="selectedExpiry"
+            class="flex-1 border-gray-300 rounded-md p-2"
+          >
+            <option selected value="1h">1 Hour</option>
+            <option value="1d">24 Hours</option>
+            <option value="7d">7 Days</option>
+            <option value="1m">30 Days</option>
+            <option value="3m">90 Days</option>
+            <option value="1y">1 Year</option>
+          </select>
+
+          <!-- Generate Button -->
+          <button
+            @click="generateLink"
+            class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition"
+          >
+            Generate Link
+          </button>
+        </div>
+
+        <!-- Generated Link Display -->
+        <div v-if="generatedLink" class="mt-4 p-2 bg-gray-100 rounded-md">
+          <label class="block text-gray-700 font-semibold"
+            >Your Share Link:</label
+          >
+          <div class="flex items-center mt-1">
+            <input
+              type="text"
+              :value="generatedLink"
+              readonly
+              class="w-full p-2 border border-gray-300 rounded-md bg-gray-50"
+            />
+            <button
+              @click="copyToClipBoard(generatedLink)"
+              class="ml-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+            >
+              Copy
+            </button>
+          </div>
+          <div v-if="generatedLinkExpiresAt" class="text-sm mt-2 text-gray-500">
+            <span class="font-bold">Expires At:&nbsp;</span
+            >{{ generatedLinkExpiresAt }}
+          </div>
+        </div>
+
+        <!-- Generated Link Display -->
+        <div
+          v-if="generateLinkError"
+          class="mt-4 p-2 bg-red-100 text-center text-red-500 rounded-md"
+        >
+          {{ generateLinkError }}
+        </div>
+
+        <!-- Modal Footer -->
+        <!-- <div class="flex justify-end mt-4">
+          <button
+            @click="
+              this.isShareModalOpen = false;
+              this.generatedLink = null;
+              this.generateLinkError = null;
+            "
+            class="btn-secondary"
+          >
+            Close
+          </button>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- Modal -->
+    <div
+      v-if="isRenameModalOpen"
+      class="fixed inset-0 flex items-center justify-center z-50"
+    >
+      <!-- Backdrop -->
+      <div
+        class="fixed inset-0 bg-black opacity-50"
+        @click="
+          this.isRenameModalOpen = false;
+          this.renameSuccess = null;
+          this.renameError = null;
+        "
+      ></div>
+
+      <!-- Modal Content -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full mx-4 md:mx-auto relative z-10"
+      >
+        <h2 class="text-xl font-semibold mb-4">Rename Video Title</h2>
+
+        <div class="flex items-center space-x-2 mb-4">
+          <!-- Text Input for Expiry Time -->
+          <input
+            type="text"
+            v-model="renameVideoTitle"
+            placeholder="New Video Title"
+            class="flex-1 border-gray-300 rounded-md p-2"
+          />
+
+          <!-- Rename Button -->
+          <button
+            @click="handleRenameClick"
+            class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition"
+          >
+            Rename
+          </button>
+        </div>
+
+        <!-- Generated Link Display -->
+        <div
+          v-if="renameError"
+          class="mt-4 p-2 bg-red-100 text-center text-red-500 rounded-md"
+        >
+          {{ renameError }}
+        </div>
+        <div
+          v-if="renameSuccess"
+          class="mt-4 p-2 bg-green-50 text-center text-green-500 rounded-md"
+        >
+          {{ renameSuccess }}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { getUserVideos, getVideoURL } from "../../utils/user";
+import { generateShareLink, renameVideoTitle } from "../../utils/video";
+import {
+  getMinutes,
+  copyToClipBoard,
+  formatDate,
+  formatFileSize,
+} from "../../utils/common";
 
 export default {
   data() {
     return {
       videos: [],
       videoURLs: [],
+
+      isShareModalOpen: false,
+      shareVideoId: null,
+      selectedExpiry: "1h",
+      generatedLink: "",
+      generateLinkError: null,
+      generatedLinkExpiresAt: "",
+
+      renameVideoTitle: "",
+      isRenameModalOpen: false,
+      renameVideoId: null,
+      renameError: null,
+      renameSuccess: null,
     };
   },
   computed: {
@@ -95,7 +278,9 @@ export default {
     this.fetchVideos(); // Fetch the video data when the component is mounted
   },
   methods: {
-    // Fetch the video data from API or local storage
+    copyToClipBoard,
+    formatDate,
+    formatFileSize,
     async fetchVideos() {
       try {
         const videosResult = await getUserVideos(); // Replace with your API endpoint
@@ -113,19 +298,70 @@ export default {
         console.error("Error fetching videos:", error);
       }
     },
-    // Format file size (in bytes) to a more human-readable format
-    formatFileSize(sizeInBytes) {
-      const sizeInMB = sizeInBytes / (1024 * 1024);
-      return sizeInMB.toFixed(2) + " MB";
+    openShareModal() {
+      this.isShareModalOpen = true;
     },
-    // Format the timestamp to a readable date
-    formatDate(timestamp) {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    closeShareModal() {
+      this.isShareModalOpen = false;
+      this.generatedLink = null;
+      this.generateLinkError = null;
+    },
+    shareVideo(videoId) {
+      this.shareVideoId = videoId;
+      this.openShareModal();
+    },
+    async generateLink() {
+      this.generateLinkError = null;
+      this.generatedLink = null;
+      this.generatedLinkExpiresAt = null;
+      setTimeout(async () => {
+        const expiryTime = getMinutes(this.selectedExpiry);
+        console.log(expiryTime);
+        const videoId = this.shareVideoId;
+        const response = await generateShareLink({
+          videoId,
+          expiryTime,
+        });
+        const { status, link, expiresAt } = response;
+        if (status === 200) {
+          this.generatedLink = `http://localhost:5173/view/${link}`;
+          this.generateLinkError = null;
+          this.generatingLink = false;
+          this.generatedLinkExpiresAt = this.formatDate(new Date(expiresAt));
+        } else {
+          this.generatedLink = null;
+          this.generateLinkError =
+            "Error Generating Link, Check Credits or Try Again";
+          this.generatingLink = false;
+          this.generatedLinkExpiresAt = null;
+        }
+      }, 500);
+    },
+    handleRenameVideoModal(video) {
+      const { title, _id } = video;
+      this.renameVideoTitle = title;
+      this.renameVideoId = _id;
+      this.isRenameModalOpen = true;
+    },
+    async handleRenameClick() {
+      try {
+        const response = await renameVideoTitle({
+          videoId: this.renameVideoId,
+          videoName: this.renameVideoTitle,
+        });
+        const { status, errors } = response;
+        if (status === 200) {
+          this.renameSuccess = "Rename Successful!";
+          this.renameError = null;
+          const videoIndex = this.videos.findIndex(
+            (v) => v._id === this.renameVideoId
+          );
+          this.videos[videoIndex].title = this.renameVideoTitle;
+        } else {
+          this.renameError = errors;
+          this.renameSuccess = null;
+        }
+      } catch (error) {}
     },
   },
 };
@@ -133,4 +369,95 @@ export default {
 
 <style scoped>
 /* Additional styling can go here */
+/* Basic styling for the button */
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+/* Modal content styling */
+.fixed {
+  position: fixed;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.bg-black {
+  background-color: black;
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.max-w-sm {
+  max-width: 24rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>
