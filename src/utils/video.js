@@ -4,8 +4,6 @@ import store from "../store";
 const axios = new AxiosHelper("http://localhost:3000");
 
 export async function uploadVideoDetails(file, authToken) {
-  console.log(file);
-
   try {
     const response = await axios.post("/video/upload", file, {
       "x-auth-token": authToken || store.getters.getToken,
@@ -20,6 +18,65 @@ export async function uploadVideoDetails(file, authToken) {
     return {
       status: 400,
       errors: "Upload Error!",
+    };
+  }
+}
+
+export async function generateShareLink({ videoId, expiryTime }, authToken) {
+  try {
+    const response = await axios.post(
+      `/video/share/${videoId}`,
+      { expiryDuration: expiryTime },
+      {
+        "x-auth-token": authToken || store.getters.getToken,
+      }
+    );
+    if (response.message.includes("generated successfully")) {
+      const { message, url, expiresAt, link } = response;
+      return { errors: null, status: 200, message, url, expiresAt, link };
+    } else {
+      return {
+        errors: "Upload Error!",
+        status: 400,
+        message,
+        url,
+        expiresAt,
+        link,
+      };
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      errors: "Share Error!",
+    };
+  }
+}
+
+export async function renameVideoTitle({ videoId, videoName }, authToken) {
+  try {
+    const response = await axios.put(
+      `/video/rename/${videoId}`,
+      { videoName },
+      {
+        "x-auth-token": authToken || store.getters.getToken,
+      }
+    );
+    if (response.msg.includes("Update Success")) {
+      return {
+        errors: null,
+        status: 200,
+      };
+    } else {
+      return {
+        errors: response.error,
+        status: 400,
+      };
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      errors:
+        "Rename Error!, Check if Video with the specified name already exists ",
     };
   }
 }
