@@ -1,12 +1,12 @@
 <template>
   <div
-    class="fixed bottom-0 left-0 w-full flex items-center justify-center bg-white py-3 shadow-md"
+    class="fixed bottom-0 left-0 w-full flex items-center justify-center bg-gray-300 py-3 shadow-md"
   >
     <!-- Previous Button -->
     <button
       @click="goToPreviousPage"
       :disabled="currentPage === 1"
-      class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md disabled:bg-gray-300 disabled:text-gray-400"
+      class="px-2 py-1 bg-gray-200 text-gray-600 rounded-md disabled:bg-gray-300 disabled:text-gray-400"
     >
       Previous
     </button>
@@ -20,7 +20,7 @@
     <button
       @click="goToNextPage"
       :disabled="currentPage === totalPages"
-      class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md disabled:bg-gray-300 disabled:text-gray-400"
+      class="px-2 py-1 bg-gray-200 text-gray-600 rounded-md disabled:bg-gray-300 disabled:text-gray-400"
     >
       Next
     </button>
