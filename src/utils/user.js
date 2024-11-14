@@ -3,21 +3,29 @@ import store from "../store";
 
 const axios = new AxiosHelper("http://localhost:3000");
 
-export async function getUserVideos(authToken) {
+export async function getUserVideos(options = {}, authToken) {
   try {
+    const { limit, pageNumber } = options;
     const response = await axios.get(
-      "/user/videos",
+      limit && pageNumber
+        ? `/user/videos?limit=${limit}&pageNumber=${pageNumber}`
+        : "/user/videos",
       {},
       { "x-auth-token": authToken || store.getters.getToken }
     );
     if (response.videos) {
-      return { videos: response.videos, errors: null };
+      return {
+        videos: response.videos,
+        errors: null,
+        itemCount: response.itemCount,
+      };
     } else {
-      return { videos: [], errors: response.errors };
+      return { videos: [], errors: response.errors, itemCount: 0 };
     }
   } catch (error) {
     return {
       videos: [],
+      itemCount: 0,
       errors: "Error fetching user videos",
     };
   }

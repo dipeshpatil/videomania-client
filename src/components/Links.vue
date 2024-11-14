@@ -21,35 +21,37 @@
       <tbody>
         <tr
           v-for="(videoLink, index) in links"
-          :key="videoLink._id"
+          :key="videoLink?._id"
           class="text-sm hover:bg-gray-50"
         >
-          <td class="px-6 py-4 text-gray-800">{{ videoLink.videoId.title }}</td>
+          <td class="px-6 py-4 text-gray-800">
+            {{ videoLink?.videoId?.title }}
+          </td>
           <td class="px-6 py-4 text-gray-800">
             <a
-              :href="`/view/${videoLink.link}`"
+              :href="`/view/${videoLink?.link}`"
               target="_blank"
               class="text-blue-600 hover:text-blue-800 underline"
             >
-              {{ videoLink.link }}
+              {{ videoLink?.link }}
             </a>
           </td>
           <td>
             <span
               :class="
-                formattedLinkDetails[index].isExpired
+                formattedLinkDetails[index]?.isExpired
                   ? 'bg-red-100 text-red-500 text-sm ml-6 rounded-full px-3 py-1'
                   : 'bg-blue-100 text-blue-500 text-sm ml-6 rounded-full px-3 py-1'
               "
             >
               {{
-                formattedLinkDetails[index].isExpired
+                formattedLinkDetails[index]?.isExpired
                   ? "Expired"
-                  : formattedLinkDetails[index].linkStatus
+                  : formattedLinkDetails[index]?.linkStatus
               }}
             </span>
           </td>
-          <td class="px-6 py-4 text-gray-800">{{ videoLink.user.name }}</td>
+          <td class="px-6 py-4 text-gray-800">{{ videoLink?.user?.name }}</td>
         </tr>
       </tbody>
     </table>

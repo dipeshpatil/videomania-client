@@ -80,3 +80,28 @@ export async function renameVideoTitle({ videoId, videoName }, authToken) {
     };
   }
 }
+
+export async function trimVideo({ startTime, endTime, videoId }, authToken) {
+  try {
+    const response = await axios.post(
+      `/video/trim/${videoId}`,
+      { start: startTime, end: endTime },
+      {
+        "x-auth-token": authToken || store.getters.getToken,
+      }
+    );
+    if (response.title.includes("trim")) {
+      return { ...response, status: 200 };
+    } else {
+      return {
+        status: 400,
+        errors: "Trim Error!",
+      };
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      errors: "Trim Error!",
+    };
+  }
+}

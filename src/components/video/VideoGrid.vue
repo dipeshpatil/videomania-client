@@ -22,7 +22,7 @@
           </p>
           <p class="text-sm text-gray-600">
             <span class="font-bold">Duration:</span>
-            {{ video.duration }} sec
+            {{ video.duration.toFixed(2) }} sec
           </p>
           <p class="text-sm text-gray-600">
             <span class="font-bold">Uploaded:</span>
@@ -32,7 +32,7 @@
             class="flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-lg"
           >
             <a
-              :href="video.filePath"
+              :href="videoURLs[index]"
               target="_blank"
               class="text-blue-500 hover:underline"
             >
@@ -40,6 +40,7 @@
             </a>
             <div class="flex space-x-2">
               <button
+                v-if="enableRenameFeature"
                 @click="handleRenameVideoModal(video)"
                 class="text-white bg-green-500 hover:bg-green-600 px-2 py-1 rounded-md"
               >
@@ -52,12 +53,14 @@
                 Share
               </button>
               <button
-                @click="trimVideo(video._id)"
+                v-if="enableTrimFeature"
+                @click="handleTrimVideoModal(video)"
                 class="text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md"
               >
                 Trim
               </button>
               <button
+                v-if="enableDeleteFeature"
                 @click="deleteVideo(video._id)"
                 class="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-md"
               >
@@ -98,7 +101,7 @@
           <select
             id="expiry"
             v-model="selectedExpiry"
-            class="flex-1 border-gray-300 rounded-md p-2"
+            class="flex-1 bg-gray-100 border-gray-300 rounded-md p-2"
           >
             <option selected value="1h">1 Hour</option>
             <option value="1d">24 Hours</option>
@@ -195,7 +198,7 @@
             type="text"
             v-model="renameVideoTitle"
             placeholder="New Video Title"
-            class="flex-1 border-gray-300 rounded-md p-2"
+            class="flex-1 border-gray-300 rounded-md p-2 bg-gray-100"
           />
 
           <!-- Rename Button -->
@@ -223,17 +226,94 @@
       </div>
     </div>
   </div>
+
+  <div>
+    <!-- Modal -->
+    <div
+      v-if="isTrimVideoModalOpen"
+      class="fixed inset-0 flex items-center justify-center z-50"
+    >
+      <!-- Backdrop -->
+      <div
+        class="fixed inset-0 bg-black opacity-50"
+        @click="
+          this.isTrimVideoModalOpen = false;
+          this.trimVideoError = null;
+          this.trimVideoSuccess = null;
+        "
+      ></div>
+
+      <!-- Modal Content -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-8 max-w-xl w-full mx-4 md:mx-auto relative z-10"
+      >
+        <h2 class="text-xl font-semibold mb-4">Trim Video</h2>
+
+        <div class="flex items-center space-x-2 mb-4">
+          <!-- Text Input for Start Time -->
+          <input
+            type="number"
+            v-model="trimStartTime"
+            placeholder="Start Time..."
+            class="flex-1 border-gray-300 rounded-md p-2"
+          />
+
+          <!-- Text Input for End Time -->
+          <input
+            type="number"
+            v-model="trimEndTime"
+            placeholder="End Time..."
+            class="flex-1 border-gray-300 rounded-md p-2"
+          />
+
+          <!-- Trim Button -->
+          <button
+            @click="handleTrimVideo"
+            class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-md transition"
+          >
+            Trim
+          </button>
+        </div>
+
+        <!-- Generated Link Display -->
+        <div
+          v-if="trimVideoError"
+          class="mt-4 p-2 bg-red-100 text-center text-red-500 rounded-md"
+        >
+          {{ trimVideoError }}
+        </div>
+        <div
+          v-if="trimVideoSuccess"
+          class="mt-4 p-2 bg-green-50 text-center text-green-500 rounded-md"
+        >
+          {{ trimVideoSuccess }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <Pagination
+    :total-items="totalItems"
+    :items-per-page="itemsPerPage"
+    @page-changed="handlePageChange"
+  />
 </template>
 
 <script>
 import { getUserVideos, getVideoURL } from "../../utils/user";
-import { generateShareLink, renameVideoTitle } from "../../utils/video";
+import {
+  generateShareLink,
+  renameVideoTitle,
+  trimVideo,
+} from "../../utils/video";
 import {
   getMinutes,
   copyToClipBoard,
   formatDate,
   formatFileSize,
 } from "../../utils/common";
+
+import Pagination from "../Pagination.vue";
 
 export default {
   data() {
@@ -253,7 +333,28 @@ export default {
       renameVideoId: null,
       renameError: null,
       renameSuccess: null,
+
+      isTrimVideoModalOpen: false,
+      trimVideoId: null,
+      trimVideoError: null,
+      trimVideoSuccess: null,
+      trimStartTime: 0,
+      trimEndTime: 0,
+
+      enableTrimFeature:
+        JSON.parse(localStorage.getItem("trim_feature_enabled")) || false,
+      enableRenameFeature:
+        JSON.parse(localStorage.getItem("rename_feature_enabled")) || false,
+      enableDeleteFeature:
+        JSON.parse(localStorage.getItem("delete_feature_enabled")) || false,
+
+      itemsPerPage: 6,
+      currentPage: 1,
+      totalItems: 0,
     };
+  },
+  components: {
+    Pagination,
   },
   computed: {
     async formattedVideoDetails() {
@@ -275,7 +376,7 @@ export default {
     },
   },
   async mounted() {
-    this.fetchVideos(); // Fetch the video data when the component is mounted
+    this.fetchVideos();
   },
   methods: {
     copyToClipBoard,
@@ -283,8 +384,12 @@ export default {
     formatFileSize,
     async fetchVideos() {
       try {
-        const videosResult = await getUserVideos(); // Replace with your API endpoint
-        const { videos } = videosResult;
+        const videosResult = await getUserVideos({
+          limit: this.itemsPerPage,
+          pageNumber: this.currentPage,
+        });
+        const { videos, itemCount } = videosResult;
+        this.totalItems = itemCount;
         this.videos = videos.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -298,17 +403,9 @@ export default {
         console.error("Error fetching videos:", error);
       }
     },
-    openShareModal() {
-      this.isShareModalOpen = true;
-    },
-    closeShareModal() {
-      this.isShareModalOpen = false;
-      this.generatedLink = null;
-      this.generateLinkError = null;
-    },
     shareVideo(videoId) {
       this.shareVideoId = videoId;
-      this.openShareModal();
+      this.isShareModalOpen = true;
     },
     async generateLink() {
       this.generateLinkError = null;
@@ -338,12 +435,14 @@ export default {
       }, 500);
     },
     handleRenameVideoModal(video) {
+      if (!this.enableRenameFeature) return;
       const { title, _id } = video;
       this.renameVideoTitle = title;
       this.renameVideoId = _id;
       this.isRenameModalOpen = true;
     },
     async handleRenameClick() {
+      if (!this.enableRenameFeature) return;
       try {
         const response = await renameVideoTitle({
           videoId: this.renameVideoId,
@@ -362,6 +461,41 @@ export default {
           this.renameSuccess = null;
         }
       } catch (error) {}
+    },
+    handleTrimVideoModal(video) {
+      if (!this.enableTrimFeature) return;
+      this.trimVideoId = video._id;
+      this.isTrimVideoModalOpen = true;
+      this.trimEndTime = video.duration.toFixed(2);
+    },
+    async handleTrimVideo() {
+      if (!this.enableTrimFeature) return;
+      const response = await trimVideo({
+        startTime: this.trimStartTime,
+        endTime: this.trimEndTime,
+        videoId: this.trimVideoId,
+      });
+      const { status } = response;
+      if (status === 200) {
+        this.trimVideoSuccess = "Video Trim Successful";
+        this.trimVideoError = null;
+        this.videos.unshift({
+          title: response.title,
+          filePath: response.filePath,
+          size: response.size,
+          duration: response.duration,
+          _id: response._id,
+          createdAt: response.createdAt,
+        });
+        this.videoURLs.unshift(response.filePath);
+      } else {
+        this.trimVideoSuccess = null;
+        this.trimVideoError = "Trim Error!";
+      }
+    },
+    handlePageChange(newPage) {
+      this.currentPage = newPage;
+      this.fetchVideos();
     },
   },
 };
