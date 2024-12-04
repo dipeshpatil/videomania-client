@@ -25,16 +25,18 @@
           class="text-sm hover:bg-gray-50"
         >
           <td class="px-6 py-4 text-gray-800">
-            {{ videoLink?.videoId?.title }}
+            {{ videoLink?.videoId?.title || '<Video Deleted>' }}
           </td>
           <td class="px-6 py-4 text-gray-800">
             <a
+              v-if="videoLink?.videoId?.title"
               :href="`/view/${videoLink?.link}`"
               target="_blank"
               class="text-blue-600 hover:text-blue-800 underline"
             >
               {{ videoLink?.link }}
             </a>
+            <span v-else>{{ videoLink?.link }}</span>
           </td>
           <td>
             <span

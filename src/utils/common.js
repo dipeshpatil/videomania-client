@@ -28,15 +28,6 @@ export function copyToClipBoard(text) {
   });
 }
 
-export function formatDate(timeStamp) {
-  const date = new Date(timeStamp);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export function formatFileSize(sizeInBytes) {
   const sizeInMB = sizeInBytes / (1024 * 1024);
   return sizeInMB.toFixed(2) + " MB";
@@ -53,4 +44,52 @@ export function getRemainingTimeFromMinutes(minutes) {
   else if (minutes > 12 * 30 * 24 * 60)
     return `${Math.floor(minutes / (12 * 30 * 24 * 60))}y`;
   else return "Unknown Time";
+}
+
+export function formatAction(action) {
+  switch (action) {
+    case "creditDeduction":
+      return "Credit Deduction";
+    case "creditTopUp":
+      return "Credit Top Up";
+    case "planPurchase":
+      return "Plan Purchase";
+    default:
+      return action;
+  }
+}
+
+export function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return date.toLocaleString();
+}
+
+export function formatDate(isoDateString, includeTime = true) {
+  const date = new Date(isoDateString);
+  const day = date.getDate();
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const suffixes = ["th", "st", "nd", "rd"];
+  const daySuffix =
+    day % 10 < 4 && Math.floor(day / 10) !== 1
+      ? suffixes[day % 10]
+      : suffixes[0];
+  const formattedDate = `${day}${daySuffix} ${
+    monthNames[date.getMonth()]
+  } ${date.getFullYear()}`;
+  const formattedTime = date.toLocaleTimeString("en-GB");
+
+  return includeTime ? `${formattedDate}, ${formattedTime}` : formattedDate;
 }

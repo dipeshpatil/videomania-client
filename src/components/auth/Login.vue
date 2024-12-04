@@ -84,6 +84,8 @@ export default {
     // Redirect if not authenticated
     if (this.isAuthenticated) {
       this.$router.push("/");
+    } else {
+      this.redirectLogin();
     }
   },
   data() {
@@ -106,6 +108,9 @@ export default {
     redirectHome() {
       this.$router.push("/");
     },
+    redirectLogin() {
+      this.$router.push("/login");
+    },
     async handleSubmit() {
       this.errors = { email: null, password: null, apiError: null };
 
@@ -124,8 +129,6 @@ export default {
             const { user, errors: userDetailsErrors } = userDetailsResult;
 
             if (user) {
-              console.log(user);
-
               this.$store.dispatch("saveUser", user);
               this.redirectHome();
             } else {

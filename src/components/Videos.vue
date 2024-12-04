@@ -69,8 +69,8 @@
 
 <script>
 import VideoUpload from "./video/VideoUpload.vue";
-
 import { getUserVideos } from "../utils/user";
+import { formatDate, formatFileSize } from "../utils/common";
 
 export default {
   components: {
@@ -104,7 +104,7 @@ export default {
     this.fetchVideos(); // Fetch the video data when the component is mounted
   },
   methods: {
-    // Fetch the video data from API or local storage
+    formatDate,
     async fetchVideos() {
       try {
         const videosResult = await getUserVideos(); // Replace with your API endpoint
@@ -115,22 +115,8 @@ export default {
         console.error("Error fetching videos:", error);
       }
     },
-    // Format file size (in bytes) to a more human-readable format
-    formatFileSize(sizeInBytes) {
-      const sizeInMB = sizeInBytes / (1024 * 1024);
-      return sizeInMB.toFixed(2) + " MB";
-    },
-    // Format the timestamp to a readable date
-    formatDate(timestamp) {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    },
+    formatFileSize,
     handleVideoUploaded(result) {
-      // This method will be called when the 'file-uploaded' event is emitted
       console.log("Notification:", result);
       this.fetchVideos();
     },

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold text-center mb-6">Upload Video</h2>
 
     <!-- Video File Upload Section -->
