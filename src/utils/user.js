@@ -77,3 +77,27 @@ export async function getVideoURL(videoId, authToken) {
     };
   }
 }
+
+export async function deleteVideo(videoId, authToken) {
+  try {
+    const response = await axios.delete(`/video/${videoId}`, {
+      "x-auth-token": authToken || store.getters.getToken,
+    });
+    if (response.msg === "Delete successful") {
+      return {
+        errors: null,
+        deleted: true,
+      };
+    } else {
+      return {
+        deleted: false,
+        errors: "Error deleting video",
+      };
+    }
+  } catch (error) {
+    return {
+      deleted: false,
+      errors: "Error deleting video",
+    };
+  }
+}

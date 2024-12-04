@@ -26,7 +26,7 @@
           </p>
           <p class="text-sm text-gray-600">
             <span class="font-bold">Uploaded:</span>
-            {{ formatDate(video.createdAt) }}
+            {{ formatDate(video.createdAt, false) }}
           </p>
           <div
             class="flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-lg"
@@ -61,7 +61,7 @@
               </button>
               <button
                 v-if="enableDeleteFeature"
-                @click="deleteVideo(video._id)"
+                @click="handleDeleteVideoModal(video)"
                 class="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-md"
               >
                 Delete
@@ -292,6 +292,81 @@
     </div>
   </div>
 
+  <div>
+    <!-- Modal -->
+    <div
+      v-if="isDeleteVideoModalOpen"
+      class="fixed inset-0 flex items-center justify-center z-50"
+    >
+      <!-- Backdrop -->
+      <div
+        class="fixed inset-0 bg-black opacity-50"
+        @click="
+          isDeleteVideoModalOpen = false;
+          deleteVideoError = null;
+          deleteVideoSuccess = null;
+          isDeleting = false;
+        "
+      ></div>
+
+      <!-- Modal Content -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-8 max-w-xl w-full mx-4 md:mx-auto relative z-10"
+      >
+        <h3 class="text-l mb-4">
+          Delete
+          <span class="font-semibold underline">{{ deleteVideoTitle }}</span> ?
+        </h3>
+
+        <div class="flex items-center space-x-1 mb-4">
+          <button
+            :disabled="isDeleting"
+            @click="handleDeleteVideo"
+            :class="[
+              'flex-1 py-2 px-4 rounded-md transition',
+              isDeleting
+                ? 'bg-gray-100 text-gray-800'
+                : 'bg-red-500 hover:bg-red-600 text-white',
+            ]"
+          >
+            Delete
+          </button>
+          <button
+            :disabled="isDeleting"
+            @click="
+              isDeleteVideoModalOpen = false;
+              deleteVideoId = null;
+              deleteVideoTitle = null;
+              isDeleting = false;
+            "
+            :class="[
+              'flex-1 py-2 px-4 rounded-md transition',
+              isDeleting
+                ? 'bg-gray-100 text-gray-800'
+                : 'bg-gray-400 hover:bg-gray-600 text-white',
+            ]"
+          >
+            {{ deleteVideoSuccess ? "Close" : "Cancel" }}
+          </button>
+        </div>
+
+        <!-- Generated Link Display -->
+        <div
+          v-if="deleteVideoError"
+          class="mt-4 p-2 bg-red-100 text-center text-red-500 rounded-md"
+        >
+          {{ deleteVideoError }}
+        </div>
+        <div
+          v-if="deleteVideoSuccess"
+          class="mt-4 p-2 bg-green-50 text-center text-green-500 rounded-md"
+        >
+          {{ deleteVideoSuccess }}
+        </div>
+      </div>
+    </div>
+  </div>
+
   <Pagination
     :total-items="totalItems"
     :items-per-page="itemsPerPage"
@@ -300,7 +375,7 @@
 </template>
 
 <script>
-import { getUserVideos, getVideoURL } from "../../utils/user";
+import { getUserVideos, getVideoURL, deleteVideo } from "../../utils/user";
 import {
   generateShareLink,
   renameVideoTitle,
@@ -340,6 +415,13 @@ export default {
       trimVideoSuccess: null,
       trimStartTime: 0,
       trimEndTime: 0,
+
+      isDeleteVideoModalOpen: false,
+      deleteVideoId: null,
+      deleteVideoTitle: null,
+      deleteVideoSuccess: null,
+      deleteVideoError: null,
+      isDeleting: false,
 
       enableTrimFeature:
         JSON.parse(localStorage.getItem("trim_feature_enabled")) || false,
@@ -496,6 +578,27 @@ export default {
     handlePageChange(newPage) {
       this.currentPage = newPage;
       this.fetchVideos();
+    },
+    handleDeleteVideoModal(video) {
+      if (!this.enableDeleteFeature) return;
+      this.deleteVideoId = video._id;
+      this.deleteVideoTitle = video.title;
+      this.isDeleteVideoModalOpen = true;
+    },
+    async handleDeleteVideo() {
+      this.isDeleting = true;
+      const response = await deleteVideo(this.deleteVideoId);
+      if (response.deleted) {
+        this.deleteVideoError = null;
+        this.deleteVideoSuccess = `${this.deleteVideoTitle} Deleted Successfully`;
+        this.videos = this.videos.filter(
+          (video) => video._id !== this.deleteVideoId
+        );
+      } else {
+        this.deleteVideoError = `Error deleting ${this.deleteVideoTitle}`;
+        this.deleteVideoSuccess = null;
+      }
+      this.isDeleting = false;
     },
   },
 };
