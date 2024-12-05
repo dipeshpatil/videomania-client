@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto p-4">
     <h1 class="text-xl font-bold mb-4">Your Videos</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
       <div
         v-for="(video, index) in videos"
         :key="video._id"
@@ -28,43 +28,34 @@
             <span class="font-bold">Uploaded:</span>
             {{ formatDate(video.createdAt, false) }}
           </p>
-          <div
-            class="flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-lg"
-          >
-            <a
-              :href="videoURLs[index]"
-              target="_blank"
-              class="text-blue-500 hover:underline"
-            >
-              Download
-            </a>
+          <div class="flex justify-between items-center mt-4 rounded-lg">
             <div class="flex space-x-2">
               <button
                 v-if="enableRenameFeature"
                 @click="handleRenameVideoModal(video)"
-                class="text-white bg-green-500 hover:bg-green-600 px-2 py-1 rounded-md"
+                class="flex items-center text-white bg-green-500 hover:bg-green-600 px-2 py-1 rounded-md space-x-1"
               >
-                Rename
+                <PencilIcon class="h-6 w-6" />
               </button>
               <button
                 @click="shareVideo(video._id)"
-                class="text-white bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded-md"
+                class="flex items-center text-white bg-blue-500 hover:bg-blue-600 px-2 py-1 rounded-md space-x-1"
               >
-                Share
+                <ShareIcon class="h-6 w-6" />
               </button>
               <button
                 v-if="enableTrimFeature"
                 @click="handleTrimVideoModal(video)"
-                class="text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md"
+                class="flex items-center text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md space-x-1"
               >
-                Trim
+                <ScissorsIcon class="h-6 w-6" />
               </button>
               <button
                 v-if="enableDeleteFeature"
                 @click="handleDeleteVideoModal(video)"
-                class="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-md"
+                class="flex items-center text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-md space-x-1"
               >
-                Delete
+                <TrashIcon class="h-6 w-6" />
               </button>
             </div>
           </div>
@@ -311,14 +302,14 @@
 
       <!-- Modal Content -->
       <div
-        class="bg-white rounded-lg shadow-lg p-8 max-w-xl w-full mx-4 md:mx-auto relative z-10"
+        class="bg-white rounded-lg p-6 max-w-sm w-full mx-2 sm:mx-auto relative z-10"
       >
         <h3 class="text-l mb-4">
           Delete
           <span class="font-semibold underline">{{ deleteVideoTitle }}</span> ?
         </h3>
 
-        <div class="flex items-center space-x-1 mb-4">
+        <div class="flex items-center space-x-4">
           <button
             :disabled="isDeleting"
             @click="handleDeleteVideo"
@@ -390,6 +381,13 @@ import {
 
 import Pagination from "../Pagination.vue";
 
+import {
+  PencilIcon,
+  TrashIcon,
+  ShareIcon,
+  ScissorsIcon,
+} from "@heroicons/vue/24/outline";
+
 export default {
   data() {
     return {
@@ -424,7 +422,7 @@ export default {
       isDeleting: false,
 
       enableTrimFeature:
-        JSON.parse(localStorage.getItem("trim_feature_enabled")) || false,
+        this.$store.getters.getUser.permissions.includes("TRIM"),
       enableRenameFeature:
         JSON.parse(localStorage.getItem("rename_feature_enabled")) || false,
       enableDeleteFeature:
@@ -437,6 +435,10 @@ export default {
   },
   components: {
     Pagination,
+    PencilIcon,
+    TrashIcon,
+    ShareIcon,
+    ScissorsIcon,
   },
   computed: {
     async formattedVideoDetails() {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <PlanDetails />
-    <CreditTopup />
+    <!-- <CreditTopup /> -->
   </div>
 </template>
 
